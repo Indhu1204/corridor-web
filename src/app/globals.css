@@ -1,0 +1,3 @@
+@import "tailwindcss";
+:root { --lime: #8fd83a; --lime-deep: #6fb81c; --ink: #0b0b0b; --charcoal: #1a1a1a; --grey: #ececec; --pos: #6fb81c; --neg: #e5484d; --warn: #f2b91f; }
+body { background: var(--lime); color: var(--ink); font-variant-numeric: tabular-nums; }
