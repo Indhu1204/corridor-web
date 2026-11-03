@@ -1,0 +1,6 @@
+import type { PaymentStatus, PaymentRailStatus } from "@/types";
+const LABELS: Record<PaymentStatus | PaymentRailStatus, string> = {
+  created: "Created", submitted: "Submitted", onchain_pending: "On-chain pending", onchain_confirmed: "On-chain confirmed", fiat_payout_pending: "Fiat payout pending", fiat_payout_completed: "Fiat payout completed", failed: "Failed", reconciliation_required: "Reconciliation required", not_started: "Not started", pending: "Pending", confirmed: "Confirmed", completed: "Completed",
+};
+const TONES: Record<PaymentStatus | PaymentRailStatus, string> = { created: "bg-neutral-100 text-neutral-700", submitted: "bg-blue-50 text-blue-800", onchain_pending: "bg-amber-50 text-amber-800", onchain_confirmed: "bg-lime-100 text-lime-900", fiat_payout_pending: "bg-amber-50 text-amber-800", fiat_payout_completed: "bg-lime-100 text-lime-900", failed: "bg-red-50 text-red-800", reconciliation_required: "bg-orange-100 text-orange-900", not_started: "bg-neutral-100 text-neutral-500", pending: "bg-amber-50 text-amber-800", confirmed: "bg-lime-100 text-lime-900", completed: "bg-lime-100 text-lime-900" };
+export default function StatusBadge({ status }: { status: PaymentStatus | PaymentRailStatus }) { return <span className={`inline-flex whitespace-nowrap px-2 py-1 text-[10px] font-medium ${TONES[status]}`}>{LABELS[status]}</span>; }

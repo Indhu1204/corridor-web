@@ -2,23 +2,12 @@
 import { useEffect, useState } from "react";
 import { getMarketGroups } from "@/services/fx.service";
 import type { MarketGroup } from "@/types";
-const Tag = ({ v }: { v: number }) => <span className={`px-1.5 py-0.5 text-[11px] font-medium ${v > 0 ? "bg-[var(--lime)] text-black" : v < 0 ? "bg-[var(--neg)] text-white" : "bg-neutral-200"}`}>{v > 0 ? "+" : ""}{v.toFixed(2)}%</span>;
+import PageHeader from "@/components/ui/PageHeader";
+import DemoNotice from "@/components/ui/DemoNotice";
+const Tag = ({ value }: { value: number }) => <span className={`px-1.5 py-0.5 text-[11px] font-medium ${value > 0 ? "bg-[var(--lime)] text-black" : value < 0 ? "bg-[var(--neg)] text-white" : "bg-neutral-200"}`}>{value > 0 ? "+" : ""}{value.toFixed(2)}%</span>;
 export default function MarketData() {
-  const [g, setG] = useState<MarketGroup[]>([]); const [q, setQ] = useState("");
-  useEffect(() => { getMarketGroups().then(r => setG(r.data)); }, []);
-  const f = (x: MarketGroup) => x.rates.filter(r => r.pair.toLowerCase().includes(q.toLowerCase()));
-  return (<div className="p-4 sm:p-6">
-    <div className="mb-4 flex flex-wrap items-center gap-3">
-      <input value={q} onChange={e => setQ(e.target.value)} placeholder="Filter pairs, e.g. INR" className="border border-neutral-300 px-3 py-1.5 text-sm outline-none focus:border-black" />
-      <span className="ml-auto text-[11px] text-neutral-500">MOCK VALUES · not market data · updated 2026-11-02 06:30 UTC</span>
-    </div>
-    <div className="grid gap-px bg-neutral-200 md:grid-cols-[1fr_1.2fr_1fr]">{g.map(x => (
-      <section key={x.id} className={`p-5 ${x.id === "headline" ? "bg-gradient-to-b from-[#c9f08f] via-white to-white md:min-h-[420px]" : "bg-white"}`}>
-        <h2 className="text-xl font-light">{x.title}</h2><p className="text-xs text-neutral-500">{x.subtitle}</p>
-        {x.id === "headline" ? <p className="mt-24 text-5xl font-light">{x.rates[0].rate.toFixed(2)}<span className="ml-2 align-middle"><Tag v={x.rates[0].changePct} /></span></p> :
-          <ul className="mt-4 divide-y divide-neutral-100">{f(x).map(r => (
-            <li key={r.pair} className="flex items-center justify-between py-3"><span>{r.pair}</span><span className="flex items-center gap-3 text-lg">{r.rate.toLocaleString("en-US", { maximumFractionDigits: 4 })}<Tag v={r.changePct} /></span></li>))}
-            {!f(x).length && <li className="py-6 text-sm text-neutral-400">No pairs match.</li>}</ul>}
-      </section>))}</div>
-  </div>);
+  const [groups, setGroups] = useState<MarketGroup[]>([]); const [query, setQuery] = useState(""); const [error, setError] = useState(""); const [loadedAt, setLoadedAt] = useState("");
+  useEffect(() => { let active = true; getMarketGroups().then(result => { if (active) { setGroups(result.data); setLoadedAt(result.meta?.updatedAt ?? new Date().toISOString()); } }).catch(() => { if (active) setError("Market data preview could not be loaded."); }); return () => { active = false; }; }, []);
+  const filtered = (group: MarketGroup) => group.rates.filter(rate => rate.pair.toLowerCase().includes(query.toLowerCase()));
+  return <><PageHeader eyebrow="Insights" title="Market data" description="Illustrative FX and stablecoin pair values for prototype exploration."/><div className="space-y-4 p-4 sm:p-6"><DemoNotice>Mock values · not market data. The timestamp below records when this page loaded, not when any market rate was observed.</DemoNotice><div className="flex flex-wrap items-center gap-3"><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Filter pairs, e.g. INR" aria-label="Filter currency pairs" className="border border-neutral-300 px-3 py-1.5 text-sm outline-none focus:border-black"/><span className="ml-auto text-[11px] text-neutral-500">Demo fixture loaded {loadedAt ? new Date(loadedAt).toLocaleString() : "…"}</span></div>{error && <p role="alert" className="border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}{groups.length === 0 && !error ? <div className="h-48 animate-pulse bg-neutral-100"/> : <div className="grid gap-px bg-neutral-200 md:grid-cols-[1fr_1.2fr_1fr]">{groups.map(group => { const rates = filtered(group); const headline = rates[0]; return <section key={group.id} className={`p-5 ${group.id === "headline" ? "bg-gradient-to-b from-[#c9f08f] via-white to-white md:min-h-[420px]" : "bg-white"}`}><h2 className="text-xl font-light">{group.title}</h2><p className="text-xs text-neutral-500">{group.subtitle}</p>{group.id === "headline" ? headline ? <><p className="mt-24 text-5xl font-light">{headline.rate.toFixed(2)}<span className="ml-2 align-middle"><Tag value={headline.changePct}/></span></p><p className="mt-2 text-sm">{headline.pair}</p></> : <p className="mt-16 text-sm text-neutral-500">No headline rate available.</p> : <ul className="mt-4 divide-y divide-neutral-100">{rates.map(rate => <li key={rate.pair} className="flex items-center justify-between gap-2 py-3"><span>{rate.pair}</span><span className="flex items-center gap-3 text-lg">{rate.rate.toLocaleString("en-US", { maximumFractionDigits: 4 })}<Tag value={rate.changePct}/></span></li>)}{rates.length === 0 && <li className="py-6 text-sm text-neutral-400">No pairs match.</li>}</ul>}</section>; })}</div>}</div></>;
 }

@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Corridor
 
-## Getting Started
+Corridor is a prototype cross-border SME payment and settlement interface. It demonstrates how an SME could review currency conversion assumptions, create a payment instruction, and track stablecoin and supplier payout states separately.
 
-First, run the development server:
+## Technology
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 App Router and React 19
+- TypeScript (strict mode)
+- Tailwind CSS 4
+- Recharts for charts
+- Lucide React available for interface icons
+
+## Local setup
+
+Requirements: Node.js compatible with the installed Next.js version and npm.
+
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`. The current frontend needs no environment variables. Do not add credentials to the browser or commit secret values. Future server-side configuration should use a local ignored `.env.local` and a committed `.env.example` containing placeholders only.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Checks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```powershell
+npm.cmd run lint
+npx.cmd tsc --noEmit --incremental false
+npm.cmd run build
+```
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+- `/dashboard` — volume overview and corridors
+- `/payments` — payment history, search, date and status filters
+- `/payments/new` — indicative demo preview and local demo instruction
+- `/payments/[paymentId]` — payment detail with separate on-chain and fiat payout legs
+- `/fx-exchange` — indicative conversion preview
+- `/market-data` — illustrative currency and stablecoin pairs
+- `/settlements` — settlement progress and reconciliation examples
+- `/suppliers` — fictional supplier profiles and destination setup states
+- `/wallets` — illustrative testnet assets and balances
+- `/analytics` — generated volume and corridor charts
+- `/settings` — organization, preferences, security, and integration placeholders
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Demo limitations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All payments, balances, FX values, analytics, suppliers, and settlement states are mock fixtures. The conversion calculation and fee assumption are for interface demonstration only. New payment instructions are kept in local in-memory data and disappear on reload. The frontend does not connect to a wallet, move funds, request a real quote, confirm a blockchain transaction, or pay a supplier's bank account. No transaction hashes or bank payout confirmations are fabricated. “On-chain confirmed” and “fiat payout completed” are separate states; an on-chain transfer alone never means fiat payout completion.
 
-## Deploy on Vercel
+## Architecture and future backend integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Presentation lives in `src/app` and reusable UI in `src/components`; domain types are in `src/types`; frontend service contracts are in `src/services`; fixtures are isolated in `src/mocks`. The service boundary is intended to switch to typed backend API calls without putting provider credentials or financial decisions in browser code. See [Frontend architecture](docs/FRONTEND_ARCHITECTURE.md), [API contracts](docs/API_CONTRACTS.md), and [Backend handoff](docs/BACKEND_HANDOFF.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Future work can add authenticated, tenant-scoped API routes and persistence, then verified provider adapters for FX data, stablecoin infrastructure, and (if selected and supported) payout services. No Supabase, Circle, Chainlink, CCIP, or real payment integration is implemented in this phase. Add only server-side secrets using a managed secret store or ignored local environment file; never use `NEXT_PUBLIC_` for secrets. Validate provider capabilities, networks, and eligibility before describing them as supported.
